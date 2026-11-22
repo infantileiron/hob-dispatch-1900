@@ -7,12 +7,12 @@ from redis import RedisError
 
 from src.middlewares.http import RequestContext, ResponsePolicy
 from src.models.db import cache, connect
-from src.routes import inbox, ledger, session
+from src.routes import imports, inbox, ledger, session
 
 app = FastAPI(title='烘邻共享灶 · 燃气偏差班报')
 app.add_middleware(RequestContext)
 app.add_middleware(ResponsePolicy)
-for router in (session.router, ledger.router, inbox.router):
+for router in (session.router, ledger.router, imports.router, inbox.router):
     app.include_router(router)
 
 

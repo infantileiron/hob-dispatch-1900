@@ -1,17 +1,20 @@
 import {api} from '../api/client.js';
 import {instrument} from '../components/common/instrument.js';
 import {badge, empty, field, formStatus, options, pageHead, table} from '../components/common/views.js';
-import {Outcomes, ShiftKinds} from '../constants/enums.js';
+import {ImportShiftStatuses, Outcomes, ShiftKinds} from '../constants/enums.js';
 import {bindForm} from '../hooks/events.js';
 import {state} from '../stores/state.js';
 import {h, number, shanghaiInput, time, toStamp} from '../utils/format.js';
+import {bindImport, importPanel} from './imports.js';
 
 export async function ledger(render, preferred) {
-  const [stations, shifts] = await Promise.all([api.stations(), api.shifts()]);
-  Object.assign(state, {stations, shifts});
+  const [stations, shifts, batches] = await Promise.all([api.stations(), api.shifts(),
+    state.account.role === 'observer' ? [] : api.importBatches()]);
+  Object.assign(state, {stations, shifts, importBatches: batches});
   const selected = shifts.find(s => s.id === (preferred ?? state.shiftId)) ?? shifts.find(s => s.outcome === 'alerted') ?? shifts[0];
   state.shiftId = selected?.id ?? null;
-  const [detail, report] = await Promise.all([selected ? api.shift(selected.id) : null, selected?.report_id ? api.receipt(selected.report_id) : null]);
+  const [detail, report, imports] = await Promise.all([selected ? api.shift(selected.id) : null,
+    selected?.report_id ? api.receipt(selected.report_id) : null, selected ? api.shiftImports(selected.id) : []]);
   const writes = state.account.role !== 'observer';
   const current = detail?.shift;
   const rows = shifts.map(row => [
@@ -44,11 +47,15 @@ export async function ledger(render, preferred) {
     ${field('用气量（m³）', '<input type="number" name="gas_m3" min="0" max="9999999" step="0.001" required>')}
     ${field('炉分钟', '<input type="number" name="burner_minutes" min="0" max="180" step="1" required>')}
     <button class="primary" type="submit">记入用气账</button>${formStatus()}</form>` : '';
+  const importHistory = imports.length ? `<details class="slot-fold"><summary>入账记录 <span class="mono">${imports.length} 批</span></summary>
+    <ul class="import-history">${imports.map(row => `<li><span class="mono">${time(row.finished_at ?? row.created_at, true)}</span>
+      ${badge(ImportShiftStatuses[row.status] ?? row.status, row.status === 'imported' ? 'live' : row.status === 'rejected' ? 'warm' : 'muted')}
+      <span>批次 #${row.batch_id} · ${row.status === 'imported' ? `入账 ${row.imported_slots} 格 · ${number(row.totals?.gas_m3)} m³ · ${row.totals?.burner_minutes} 炉分钟` : h(row.reasons?.[0]?.text ?? '无可入账时格')}${row.blank_reasons?.length ? ` · 留空 ${row.blank_reasons.map(item => `${h(item.text)} × ${item.count}`).join('、')}` : ''}</span></li>`).join('')}</ul></details>` : '';
   if (!render(`${pageHead('01 / 用气交接', '灶台用气账', '按 15 分钟时格登记表差和炉分钟，交接时查看已冻结的班报。', writes ? '<button id="start-shift" class="primary">＋ 登记班次</button>' : '')}
     <section class="strip"><div><label>纳入巡查</label><strong>${stations.length}<small> 台灶</small></strong></div><div><label>计划投递</label><strong>${active}<small> 个班次</small></strong></div><div><label>最近偏差提醒</label><strong class="strip-code">${frozen ? h(frozen.code) : '暂无'}</strong></div></section>
     <div class="split"><div class="stack"><section class="panel"><div class="panel-head"><div><h2>班次台账</h2><p>点击班次编号查看该班的读数与规则。</p></div><span class="index">${shifts.length} 班</span></div>
     ${rows.length ? table(['班次编号','灶台','班别','收档','读数','判定'], rows) : empty('尚无班次','发布对应班别规则后登记一个班次。')}</section>${create}
-    ${detail ? `<section class="panel" id="readings"><div class="panel-head"><div><h2>测量时格</h2><p class="mono">${h(current.code)} · ${time(current.starts_at)} → ${time(current.ends_at)}</p></div>${current.evaluated_at ? badge('已冻结') : ''}</div>${readingTable}${entry}</section>` : ''}</div>${summary}</div>`)) return;
+    ${detail ? `<section class="panel" id="readings"><div class="panel-head"><div><h2>测量时格</h2><p class="mono">${h(current.code)} · ${time(current.starts_at)} → ${time(current.ends_at)}</p></div>${current.evaluated_at ? badge('已冻结') : ''}</div>${readingTable}${entry}${importHistory}</section>` : ''}</div>${summary}</div>${importPanel()}`)) return;
   document.querySelectorAll('[data-shift]').forEach(button => button.onclick = () => { location.hash = `/ledger/${button.dataset.shift}`; });
   document.querySelector('#start-shift')?.addEventListener('click', () => {
     const form = document.querySelector('#create-shift'); form.open = true; form.scrollIntoView({block:'center'}); form.querySelector('input').focus();
@@ -61,5 +68,9 @@ export async function ledger(render, preferred) {
     await api.reading(current.id, {sampled_at: toStamp(data.sampled_at), gas_m3: data.gas_m3, burner_minutes: Number(data.burner_minutes)});
     await ledger(render, current.id);
     document.querySelector('#readings')?.scrollIntoView({block:'nearest'});
+  });
+  bindImport(async () => {
+    await ledger(render, state.shiftId);
+    document.querySelector('#batch-import')?.scrollIntoView({block:'start'});
   });
 }

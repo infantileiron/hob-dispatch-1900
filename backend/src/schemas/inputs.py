@@ -37,3 +37,26 @@ class ReadingInput(Input):
     sampled_at: AwareDatetime
     gas_m3: Annotated[Decimal, Field(ge=0, max_digits=10, decimal_places=3)]
     burner_minutes: Annotated[int, Field(ge=0, le=180)]
+
+
+class MeterReadingInput(Input):
+    sampled_at: AwareDatetime
+    value_m3: Annotated[Decimal, Field(ge=0, max_digits=10, decimal_places=3)]
+    meter_no: Annotated[str | None, Field(max_length=40)] = None
+
+
+class IgnitionLogInput(Input):
+    sampled_at: AwareDatetime
+    burner_minutes: Annotated[int, Field(ge=0, le=180)]
+
+
+class ImportShiftInput(Input):
+    code: Annotated[str, Field(pattern=r'^[A-Z0-9][A-Z0-9-]{2,39}$')]
+    meter_readings: Annotated[list[MeterReadingInput], Field(max_length=500)] = []
+    ignition_logs: Annotated[list[IgnitionLogInput], Field(max_length=2000)] = []
+
+
+class ImportInput(Input):
+    # Optional so the same body can be sent to the side-effect-free preview endpoint.
+    idempotency_key: Annotated[str, Field(pattern=r'^[A-Za-z0-9._:-]{8,80}$')] | None = None
+    shifts: Annotated[list[ImportShiftInput], Field(min_length=1, max_length=200)]

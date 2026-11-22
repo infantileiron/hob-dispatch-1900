@@ -4,3 +4,6 @@ export const Mailboxes = {kitchen: '厨房值班箱', operations: '运营核对�
 export const Outcomes = {alerted: '提醒已投递', cooldown: '冷却抑制', within_rule: '未达提醒条件', unmeasurable: '无可评估读数'};
 export const States = {over: '超限', within: '未超限', idle: '停炉', missing: '未报'};
 export const DeliveryKinds = {report: '班报', alert: '偏差提醒'};
+export const ImportStatuses = {importing: '入账中', completed: '全部入账', partial: '部分入账', failed: '整批退回', empty: '无可入账'};
+export const ImportShiftStatuses = {pending: '待处理', imported: '已入账', rejected: '整班退回', empty: '无可入账', ready: '可入账'};
+export const ImportSlotStates = {import: '入账', blank: '留空'};

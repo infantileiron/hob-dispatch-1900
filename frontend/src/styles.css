@@ -131,6 +131,24 @@ input,select {min-width:0;width:100%;border:1px solid var(--border);background:v
 .empty strong {color:var(--ink);font-size:16px;}
 .empty p {margin-top:4px;}
 .notice {color:var(--green); background:var(--mint); padding:10px;margin:-9px 0 15px;}
+textarea {min-width:0;width:100%;border:1px solid var(--border);background:var(--panel);color:var(--ink);border-radius:3px;padding:9px;font:12px/1.5 var(--numeric);resize:vertical;}
+#import-form label {gap:6px;}
+.import-actions {display:flex; gap:8px; align-items:center;}
+.import-section {border-top:1px solid var(--border);}
+.import-section .panel-head h3 {font-size:15px;font-weight:760;letter-spacing:-.02em;}
+.import-card {border-top:1px solid var(--border);padding:13px 20px;}
+.import-card header {display:flex;justify-content:space-between;gap:12px;align-items:flex-start;}
+.import-card small {display:block;color:var(--dim);}
+.import-total {margin-top:7px;color:var(--dim);font-size:12px;}
+.import-total strong {color:var(--ink);font-size:13px;}
+.reason-list {margin:8px 0 0;padding-left:18px;color:var(--heat);font-size:12px;display:grid;gap:3px;}
+.slot-fold {border-top:1px dashed var(--border);margin-top:10px;padding-top:8px;}
+.slot-fold summary {cursor:pointer;font-size:12px;color:var(--green);font-weight:700;display:flex;gap:8px;align-items:center;}
+.slot-fold table {margin-top:8px;font-size:12px;}
+.slot-fold td {padding:6px 8px;}
+.import-history {list-style:none;margin:8px 0 0;padding:0;display:grid;gap:7px;font-size:12px;}
+.import-history li {display:flex;gap:9px;align-items:baseline;flex-wrap:wrap;padding:0 20px 9px;}
+.import-history li + li {border-top:1px solid var(--border);padding-top:9px;}
 .mailbox-field {display:grid;gap:4px;}
 .mailbox-field select {min-width:155px;}
 .breadcrumb {display:inline-block;margin-bottom:14px;font-size:12px;}

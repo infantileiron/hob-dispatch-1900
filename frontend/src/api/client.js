@@ -18,6 +18,9 @@ export const api = {
   shift: id => request(`/shifts/${id}`), newShift: body => request('/shifts', {body}),
   reading: (id, body) => request(`/shifts/${id}/readings`, {body}),
   rules: () => request('/rules'), publish: body => request('/rules', {body}), queue: () => request('/queue'),
+  previewImport: body => request('/imports/preview', {body}), submitImport: body => request('/imports', {body}),
+  importBatches: () => request('/imports'), importBatch: id => request(`/imports/${id}`), resumeImport: id => request(`/imports/${id}/resume`, {body: {}}),
+  shiftImports: id => request(`/shifts/${id}/imports`),
   inbox: mailbox => request(`/inbox${mailbox ? `?mailbox=${encodeURIComponent(mailbox)}` : ''}`),
   receipt: id => request(`/inbox/${id}`), export: id => request(`/inbox/${id}/export.csv`, {download: true}),
 };

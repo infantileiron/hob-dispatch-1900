@@ -24,4 +24,29 @@ class Outcome(StrEnum):
     UNMEASURABLE = 'unmeasurable'
 
 
+class ImportStatus(StrEnum):
+    IMPORTING = 'importing'
+    COMPLETED = 'completed'
+    PARTIAL = 'partial'
+    FAILED = 'failed'
+    EMPTY = 'empty'
+
+
+class ImportShiftStatus(StrEnum):
+    PENDING = 'pending'
+    IMPORTED = 'imported'
+    REJECTED = 'rejected'
+    EMPTY = 'empty'
+
+
+class SlotStatus(StrEnum):
+    IMPORT = 'import'
+    BLANK = 'blank'
+
+
+class PreviewState(StrEnum):
+    READY = 'ready'
+    REJECTED = 'rejected'
+
+
 SLOT_MINUTES = 15
